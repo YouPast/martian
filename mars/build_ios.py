@@ -11,8 +11,8 @@ SCRIPT_PATH = os.path.split(os.path.realpath(__file__))[0]
 BUILD_OUT_PATH = 'cmake_build/iOS'
 INSTALL_PATH = BUILD_OUT_PATH + '/iOS.out'
 
-IOS_BUILD_SIMULATOR_CMD = 'cmake ../.. -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=../../ios.toolchain.cmake -DPLATFORM=SIMULATOR -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1 && make -j8 && make install'
-IOS_BUILD_OS_CMD = 'cmake ../.. -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=../../ios.toolchain.cmake -DPLATFORM=OS -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1 && make -j8 && make install'
+IOS_BUILD_SIMULATOR_CMD = 'cmake -S ../.. -B . -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=../../ios.toolchain.cmake -DPLATFORM=SIMULATOR -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1 && make -j8 && make install'
+IOS_BUILD_OS_CMD = 'cmake -S ../.. -B . -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=../../ios.toolchain.cmake -DPLATFORM=OS -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1 && make -j8 && make install'
 
 GEN_IOS_OS_PROJ = 'cmake ../.. -G Xcode -DCMAKE_TOOLCHAIN_FILE=../../ios.toolchain.cmake -DPLATFORM=OS -DIOS_ARCH="arm64" -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DENABLE_VISIBILITY=1'
 OPEN_SSL_ARCHS = ['x86_64', 'arm64']
@@ -20,10 +20,10 @@ OPEN_SSL_ARCHS = ['x86_64', 'arm64']
 
 def build_ios(tag=''):
     gen_mars_revision_file('comm', tag)
-    
+
     clean(BUILD_OUT_PATH)
     os.chdir(BUILD_OUT_PATH)
-    
+
     ret = os.system(IOS_BUILD_OS_CMD)
     os.chdir(SCRIPT_PATH)
     if ret != 0:
@@ -44,7 +44,7 @@ def build_ios(tag=''):
     if ret != 0:
         print('!!!!!!!!!!!build simulator fail!!!!!!!!!!!!!!!')
         return False
-    
+
     libtool_simulator_dst_lib = INSTALL_PATH + '/simulator'
     if not libtool_libs(libtool_src_lib, libtool_simulator_dst_lib):
         return False
@@ -77,10 +77,10 @@ def build_ios(tag=''):
 
 def build_ios_xlog(tag=''):
     gen_mars_revision_file('comm', tag)
-    
+
     clean(BUILD_OUT_PATH)
     os.chdir(BUILD_OUT_PATH)
-    
+
     ret = os.system(IOS_BUILD_OS_CMD)
     os.chdir(SCRIPT_PATH)
     if ret != 0:
@@ -102,7 +102,7 @@ def build_ios_xlog(tag=''):
     if ret != 0:
         print('!!!!!!!!!!!build simulator fail!!!!!!!!!!!!!!!')
         return False
-    
+
     libtool_simulator_dst_lib = INSTALL_PATH + '/simulator'
     if not libtool_libs(libtool_src_libs, libtool_simulator_dst_lib):
         return False
@@ -137,7 +137,7 @@ def gen_ios_project():
 
     print('==================Output========================')
     print('project file: %s/%s' %(SCRIPT_PATH, BUILD_OUT_PATH))
-    
+
     return True
 
 def main():

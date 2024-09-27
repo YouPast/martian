@@ -13,9 +13,9 @@ INSTALL_PATH = BUILD_OUT_PATH + '/Darwin.out'
 
 OSX_BUILD_OS_CMD = 'cmake ../.. -DCMAKE_BUILD_TYPE=Release -DENABLE_ARC=0 -DENABLE_BITCODE=0 && make -j8 && make install'
 
-OSX_BUILD_ARM_CMD = 'cmake ../.. -DCMAKE_BUILD_TYPE=Release -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DCMAKE_OSX_ARCHITECTURES="arm64" && make -j8 && make install'
+OSX_BUILD_ARM_CMD = 'cmake -S ../.. -D . -DCMAKE_TOOLCHAIN_FILE=../../ios.toolchain.cmake -DPLATFORM=MAC_ARM64 -DCMAKE_BUILD_TYPE=Release -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DCMAKE_OSX_ARCHITECTURES="arm64" && make -j8 && make install'
 
-OSX_BUILD_X86_CMD = 'cmake ../.. -DCMAKE_BUILD_TYPE=Release -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DCMAKE_OSX_ARCHITECTURES="x86_64" && make -j8 && make install'
+OSX_BUILD_X86_CMD = 'cmake -S ../.. -D . -DCMAKE_TOOLCHAIN_FILE=../../ios.toolchain.cmake --DPLATFORM=MAC -DCMAKE_BUILD_TYPE=Release -DENABLE_ARC=0 -DENABLE_BITCODE=0 -DCMAKE_OSX_ARCHITECTURES="x86_64" && make -j8 && make install'
 
 GEN_OSX_PROJ = 'cmake ../.. -G Xcode -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=10.9 -DENABLE_BITCODE=0'
 
@@ -25,7 +25,7 @@ def build_osx(tag=''):
 
     clean(BUILD_OUT_PATH)
     os.chdir(BUILD_OUT_PATH)
-    
+
     ret = os.system(OSX_BUILD_OS_CMD)
     os.chdir(SCRIPT_PATH)
     if ret != 0:
@@ -51,10 +51,10 @@ def build_osx(tag=''):
 
 def build_osx_xlog(tag=''):
     gen_mars_revision_file('comm', tag)
-    
+
     clean(BUILD_OUT_PATH)
     os.chdir(BUILD_OUT_PATH)
-    
+
     ret = os.system(OSX_BUILD_ARM_CMD)
     os.chdir(SCRIPT_PATH)
     if ret != 0:
@@ -76,7 +76,7 @@ def build_osx_xlog(tag=''):
     if ret != 0:
         print('!!!!!!!!!!!build x86 fail!!!!!!!!!!!!!!!')
         return False
-    
+
     libtool_x86_dst_lib = INSTALL_PATH + '/mars_x86'
     if not libtool_libs(libtool_src_libs, libtool_x86_dst_lib):
         return False
