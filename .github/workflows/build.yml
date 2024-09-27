@@ -1,0 +1,71 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - "build*" # Trigger on version tags
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: "Release version (e.g., v1.0.0)"
+        required: true
+      prerelease:
+        description: "Is this a pre-release?"
+        required: true
+        type: boolean
+        default: false
+
+jobs:
+  build:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      repository-projects: write
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Select Xcode version
+      run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+      
+    - name: Build XCFramework
+      run: |
+        chmod +x ./build_xcframework.sh
+        ./build_xcframework.sh
+        
+    - name: Get version
+      id: get_version
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          echo ::set-output name=VERSION::${{ github.event.inputs.release_version }}
+        else
+          echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
+        fi
+
+    - name: Get checksum
+      id: get_checksum
+      run: |
+        CHECKSUM=$(swift package compute-checksum mars/cmake_build/mars.xcframework.zip)
+        echo ::set-output name=CHECKSUM::$CHECKSUM
+          
+    - name: Duplicate release zip with version
+      run: |
+        # Since checksum does not be influenced by the file name, we can duplicate the file with the version number
+        cp mars/cmake_build/mars.xcframework.zip mars-${{ steps.get_version.outputs.VERSION }}.xcframework.zip
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          mars/cmake_build/mars.xcframework.zip
+          mars-${{ steps.get_version.outputs.VERSION }}.xcframework.zip
+        token: ${{ secrets.GITHUB_TOKEN }}
+        name: Release ${{ steps.get_version.outputs.VERSION }}
+        prerelease: ${{ github.event.inputs.prerelease }}
+        body: |
+          Release of version ${{ steps.get_version.outputs.VERSION }}
+          
+          Checksum:
+          ```
+          ${{ steps.get_checksum.outputs.CHECKSUM }}
+          ```
