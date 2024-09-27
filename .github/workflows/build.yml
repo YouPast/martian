@@ -3,7 +3,7 @@ name: Build & Release
 on:
   push:
     tags:
-      - "build*" # Trigger on version tags
+      - "*" # Trigger on version tags
   workflow_dispatch:
     inputs:
       release_version:
